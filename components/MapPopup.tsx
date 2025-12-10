@@ -37,7 +37,7 @@ function PopupContent({ data, type, onClose }: { data: any, type: string, onClos
   }
 
   return (
-    <div className="relative bg-white rounded-lg shadow-xl p-4 w-80 text-sm border border-gray-100 font-sans">
+    <div className="relative bg-white rounded-lg p-4 w-80 text-sm font-sans">
       <button 
         onClick={onClose}
         className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
