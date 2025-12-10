@@ -3,13 +3,13 @@
 import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { useWeatherData } from '@/hooks/queries';
+import { useMapData } from '@/contexts/MapDataContext';
 
 export default function Map() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const { data: weatherData } = useWeatherData();
+  const { isigmets, airSigmets } = useMapData();
 
   useEffect(() => {
     if (map.current) return; // stops map from initializing more than once
@@ -59,10 +59,9 @@ export default function Map() {
   }, []);
 
   useEffect(() => {
-    if (!map.current || !mapLoaded || !weatherData) return;
+    if (!map.current || !mapLoaded) return;
 
     const mapInstance = map.current;
-    const { airSigmets, isigmets } = weatherData;
 
     // Handle AirSigmets
     if (mapInstance.getSource('airsigmets')) {
@@ -166,7 +165,7 @@ export default function Map() {
       });
     }
 
-  }, [weatherData, mapLoaded]);
+  }, [isigmets, airSigmets, mapLoaded]);
 
   return <div className="w-full h-screen" ref={mapContainer} />;
 }

@@ -1,9 +1,11 @@
 import Map from "@/components/map";
+import Filters from "@/components/filters";
 
 export default function Home() {
   return (
-    <div>
+    <div className="relative w-full h-screen">
       <Map />
+      <Filters />
     </div>
   )
 }
