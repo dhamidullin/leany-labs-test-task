@@ -1,2 +1,1 @@
-export * from './useIsigmets';
-export * from './useAirSigmets';
+export * from './useWeatherData';
