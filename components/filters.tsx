@@ -1,6 +1,6 @@
 'use client';
 
-import ColorCheckbox from "./color-checkbox";
+import ColorCheckbox from "./ColorCheckbox";
 import Slider from 'rc-slider';
 import { useFilter } from "@/contexts/FilterContext";
 import 'rc-slider/assets/index.css';
