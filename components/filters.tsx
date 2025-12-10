@@ -1,11 +1,11 @@
 'use client';
 
-import ColorCheckbox from "./ColorCheckbox";
 import Slider from 'rc-slider';
 import { useFilter } from "@/contexts/FilterContext";
 import 'rc-slider/assets/index.css';
 import { useState, useEffect } from "react";
 import { useDebouncedCallback } from 'use-debounce';
+import ColorCheckbox from "@/components/ColorCheckbox";
 
 export default function Filters() {
   const { 

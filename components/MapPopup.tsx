@@ -4,11 +4,10 @@ import { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import { usePopup } from '@/contexts/PopupContext';
 import { createRoot } from 'react-dom/client';
-import { IsigmetEntry, AirSigmetEntry } from '@/types';
 
 function PopupContent({ data, type, onClose }: { data: any, type: string, onClose: () => void }) {
   const isSigmet = type === 'SIGMET';
-  
+
   // Helper to format date
   const formatDate = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleString('en-US', {
@@ -23,22 +22,22 @@ function PopupContent({ data, type, onClose }: { data: any, type: string, onClos
   };
 
   const altitudeText = () => {
-      if (data.base || data.top) {
-          const base = data.base ? `${data.base}ft` : 'SFC';
-          const top = data.top ? `${data.top}ft` : 'Unknown';
-          return `${base} - ${top}`;
-      }
-      if (data.altitudeLow1 || data.altitudeHi1) {
-           const low = data.altitudeLow1 ? `${data.altitudeLow1}ft` : 'SFC';
-           const high = data.altitudeHi1 ? `${data.altitudeHi1}ft` : 'Unknown';
-           return `${low} - ${high}`;
-      }
-      return 'Unknown';
+    if (data.base || data.top) {
+      const base = data.base ? `${data.base}ft` : 'SFC';
+      const top = data.top ? `${data.top}ft` : 'Unknown';
+      return `${base} - ${top}`;
+    }
+    if (data.altitudeLow1 || data.altitudeHi1) {
+      const low = data.altitudeLow1 ? `${data.altitudeLow1}ft` : 'SFC';
+      const high = data.altitudeHi1 ? `${data.altitudeHi1}ft` : 'Unknown';
+      return `${low} - ${high}`;
+    }
+    return 'Unknown';
   }
 
   return (
     <div className="relative bg-white rounded-lg p-4 w-80 text-sm font-sans">
-      <button 
+      <button
         onClick={onClose}
         className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
       >
@@ -57,7 +56,7 @@ function PopupContent({ data, type, onClose }: { data: any, type: string, onClos
           <span className="font-semibold text-gray-900">Hazard:</span>
           <span className="text-gray-700">{data.hazard || 'Unknown'}</span>
         </div>
-        
+
         <div className="grid grid-cols-[80px_1fr] gap-2">
           <span className="font-semibold text-gray-900">Altitude:</span>
           <span className="text-gray-700">{altitudeText()}</span>
@@ -96,46 +95,55 @@ export default function MapPopup({ map }: { map: maplibregl.Map }) {
     }
 
     const { data, x, y, type, lng, lat } = popupData as any; // We'll update type definition next
-    
+
     // Create a container for the React component
     const popupNode = document.createElement('div');
     const root = createRoot(popupNode);
-    
+
     root.render(
-      <PopupContent 
-        data={data} 
-        type={type} 
+      <PopupContent
+        data={data}
+        type={type}
         onClose={() => {
           closePopup();
           if (popupRef.current) popupRef.current.remove();
-        }} 
+        }}
       />
     );
 
     // If we have lat/lng (which we will add), use setLngLat, otherwise use point (less ideal for tracking)
     // But since we want it to track the map, we MUST use LngLat.
-    
+
     if (popupRef.current) {
-        popupRef.current.remove();
+      popupRef.current.remove();
     }
 
-    popupRef.current = new maplibregl.Popup({
-        closeButton: false,
-        closeOnClick: false,
-        className: 'custom-map-popup',
-        maxWidth: 'none'
+    const popup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+      className: 'custom-map-popup',
+      maxWidth: 'none'
     })
-    .setLngLat([lng, lat])
-    .setDOMContent(popupNode)
-    .addTo(map);
+      .setLngLat([lng, lat])
+      .setDOMContent(popupNode)
+      .addTo(map);
+
+    popup.getElement().style.visibility = 'hidden';
+    popupRef.current = popup;
+
+    // This fixes the issue where popup opens off-screen initially
+    setTimeout(() => {
+      popup.setLngLat([lng, lat])
+      popup.getElement().style.visibility = 'visible';
+    });
 
     // Cleanup when component unmounts or data changes
     return () => {
-        // We generally want to keep it open until data changes to null or new data
-        // But react effect cleanup runs before next effect.
-        // We'll let the next effect execution handle removal if data exists, 
-        // or this cleanup if data becomes null.
-        setTimeout(() => root.unmount(), 0); 
+      // We generally want to keep it open until data changes to null or new data
+      // But react effect cleanup runs before next effect.
+      // We'll let the next effect execution handle removal if data exists, 
+      // or this cleanup if data becomes null.
+      setTimeout(() => root.unmount(), 0);
     };
   }, [popupData, map, closePopup]);
 
