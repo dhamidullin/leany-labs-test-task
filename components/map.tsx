@@ -4,12 +4,17 @@ import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useMapData } from '@/contexts/MapDataContext';
+import { usePopup } from '@/contexts/PopupContext';
+import center from '@turf/center';
+
+import MapPopup from './MapPopup';
 
 export default function Map() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const { isigmets, airSigmets } = useMapData();
+  const { setPopupData } = usePopup();
 
   useEffect(() => {
     if (map.current) return; // stops map from initializing more than once
@@ -112,6 +117,29 @@ export default function Map() {
           'line-width': 2,
         },
       });
+      
+      mapInstance.on('mouseenter', 'airsigmets-fill', () => {
+        mapInstance.getCanvas().style.cursor = 'pointer';
+      });
+      mapInstance.on('mouseleave', 'airsigmets-fill', () => {
+        mapInstance.getCanvas().style.cursor = '';
+      });
+      mapInstance.on('click', 'airsigmets-fill', (e) => {
+        if (e.features && e.features.length > 0) {
+            const feature = e.features[0];
+            
+            // Calculate center using turf
+            const centerPoint = center(feature as any);
+            const [lng, lat] = centerPoint.geometry.coordinates;
+            
+            setPopupData({
+                data: feature.properties as any,
+                lng,
+                lat,
+                type: 'AIRSIGMET'
+            });
+        }
+      });
     }
 
     // Handle Isigmets
@@ -163,9 +191,37 @@ export default function Map() {
           'line-width': 2,
         },
       });
+
+      // Re-bind events for isigmets
+      mapInstance.on('mouseenter', 'isigmets-fill', () => {
+        mapInstance.getCanvas().style.cursor = 'pointer';
+      });
+      mapInstance.on('mouseleave', 'isigmets-fill', () => {
+        mapInstance.getCanvas().style.cursor = '';
+      });
+      mapInstance.on('click', 'isigmets-fill', (e) => {
+        if (e.features && e.features.length > 0) {
+            const feature = e.features[0];
+            
+            // Calculate center using turf
+            const centerPoint = center(feature as any);
+            const [lng, lat] = centerPoint.geometry.coordinates;
+
+            setPopupData({
+                data: feature.properties as any,
+                lng,
+                lat,
+                type: 'SIGMET'
+            });
+        }
+      });
     }
 
   }, [isigmets, airSigmets, mapLoaded]);
 
-  return <div className="w-full h-screen" ref={mapContainer} />;
+  return (
+    <div className="w-full h-screen" ref={mapContainer}>
+      {map.current && <MapPopup map={map.current} />}
+    </div>
+  );
 }
