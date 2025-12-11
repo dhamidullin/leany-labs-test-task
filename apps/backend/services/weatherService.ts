@@ -55,8 +55,8 @@ export const fetchWeatherData = async (): Promise<NormalizedWeatherEntry[]> => {
       validTimeFrom: item.validTimeFrom,
       validTimeTo: item.validTimeTo,
       coords: item.coords,
-      base: item.altitudeLow1, // Map low altitude to base
-      top: item.altitudeHi1,   // Map high altitude to top
+      base: item.altitudeLow1,
+      top: item.altitudeHi1,  
       movementDir: item.movementDir,
       movementSpd: item.movementSpd,
       rawText: item.rawAirSigmet,

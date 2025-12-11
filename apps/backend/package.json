@@ -5,7 +5,8 @@
   "license": "ISC",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only index.ts",
-    "start": "ts-node index.ts"
+    "start": "ts-node index.ts",
+    "test": "jest"
   },
   "dependencies": {
     "@repo/types": "workspace:*",
@@ -17,7 +18,10 @@
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22.13.5",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.3"
   }
