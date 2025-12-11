@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
-import axios from 'axios';
-import { IsigmetEntry, AirSigmetEntry, NormalizedWeatherEntry, WeatherTypes } from '@repo/types';
+import { NormalizedWeatherEntry, WeatherTypes } from '@repo/types';
+import { fetchWeatherData } from './services/weatherService';
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -19,49 +19,7 @@ app.get('/ping', (req, res) => {
 
 app.get('/sigmets', async (req, res) => {
   try {
-    const [isigmetRes, airSigmetRes] = await Promise.all([
-      axios.get<IsigmetEntry[]>('https://aviationweather.gov/api/data/isigmet?format=json'),
-      axios.get<AirSigmetEntry[]>('https://aviationweather.gov/api/data/airsigmet?format=json')
-    ]);
-
-    const normalized: NormalizedWeatherEntry[] = [
-      ...isigmetRes.data.map(item => ({
-        id: `isigmet-${item.firId}-${item.seriesId}-${item.validTimeFrom}`,
-        type: WeatherTypes.ISIGMET,
-        icaoId: item.icaoId,
-        seriesId: item.seriesId,
-        hazard: item.hazard,
-        receiptTime: item.receiptTime,
-        validTimeFrom: item.validTimeFrom,
-        validTimeTo: item.validTimeTo,
-        coords: item.coords,
-        base: item.base,
-        top: item.top,
-        movementDir: item.dir,
-        movementSpd: item.spd,
-        rawText: item.rawSigmet,
-
-        qualifier: item.qualifier
-      })),
-      ...airSigmetRes.data.map(item => ({
-        id: `airsigmet-${item.icaoId}-${item.seriesId}-${item.validTimeFrom}`,
-        type: WeatherTypes.AIRSIGMET,
-        icaoId: item.icaoId,
-        seriesId: item.seriesId,
-        hazard: item.hazard,
-        receiptTime: item.receiptTime,
-        validTimeFrom: item.validTimeFrom,
-        validTimeTo: item.validTimeTo,
-        coords: item.coords,
-        base: item.altitudeLow1, // Map low altitude to base
-        top: item.altitudeHi1,   // Map high altitude to top
-        movementDir: item.movementDir,
-        movementSpd: item.movementSpd,
-        rawText: item.rawAirSigmet,
-
-        severity: item.severity
-      }))
-    ];
+    const normalized = await fetchWeatherData();
 
     const { sigmet, airsigmet, minAlt, maxAlt, date } = req.query;
 
