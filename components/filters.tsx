@@ -84,12 +84,13 @@ export default function Filters() {
             {localAltitudeRange[0].toLocaleString()} ft - {localAltitudeRange[1].toLocaleString()} ft
           </p>
         </div>
-        
+
         <div className="px-1">
           <Slider
             range
             min={0}
             max={60000}
+            step={1000}
             value={localAltitudeRange}
             onChange={handleAltitudeChange}
             trackStyle={[{ backgroundColor: '#3B82F6', height: 4 }]}
@@ -111,7 +112,8 @@ export default function Filters() {
         <div className="px-1">
           <Slider
             min={new Date().getTime() - 24 * 60 * 60 * 1000} // 24 hours ago
-            max={new Date().getTime() + 24 * 60 * 60 * 1000} // 24 hours ahead
+            max={new Date().getTime() + 6 * 60 * 60 * 1000} // 6 hours ahead
+            step={60 * 60 * 1000}
             value={localTimeFilter}
             onChange={handleTimeChange}
             trackStyle={{ backgroundColor: '#3B82F6', height: 4 }}
