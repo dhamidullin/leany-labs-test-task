@@ -3,7 +3,7 @@
 import { createContext, useContext, ReactNode, useMemo } from 'react';
 import { useFilter } from './FilterContext';
 import { useWeatherData } from '@/hooks/queries';
-import { IsigmetEntry, AirSigmetEntry } from '@/types';
+import { IsigmetEntry, AirSigmetEntry } from '@repo/types';
 
 interface MapDataContextType {
   isigmets: IsigmetEntry[];

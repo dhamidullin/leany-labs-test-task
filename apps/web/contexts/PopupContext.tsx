@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { IsigmetEntry, AirSigmetEntry } from '@/types';
+import { IsigmetEntry, AirSigmetEntry } from '@repo/types';
 
 type PopupData = {
   data: IsigmetEntry | AirSigmetEntry;

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { IsigmetEntry, AirSigmetEntry } from '@/types';
+import { IsigmetEntry, AirSigmetEntry } from '@repo/types';
 
 export interface WeatherData {
   isigmets: IsigmetEntry[];

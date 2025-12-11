@@ -89,7 +89,7 @@ export default function Filters() {
           <Slider
             range
             min={0}
-            max={60000}
+            max={48000}
             step={1000}
             value={localAltitudeRange}
             onChange={handleAltitudeChange}

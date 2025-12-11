@@ -46,3 +46,46 @@ export interface AirSigmetEntry {
   }[];
 }
 
+export const WeatherTypes = {
+  ISIGMET: 'ISIGMET',
+  AIRSIGMET: 'AIRSIGMET',
+} as const;
+
+export type WeatherType = (typeof WeatherTypes)[keyof typeof WeatherTypes];
+
+interface BaseWeatherEntry {
+  id: string; // composite id
+
+  // Common fields
+  icaoId: string;
+  seriesId: string;
+  hazard: string;
+  receiptTime: string;
+  validTimeFrom: number;
+  validTimeTo: number;
+
+  // Geometry
+  coords: {
+    lat: number;
+    lon: number;
+  }[];
+
+  // Altitude / Vertical extent
+  base: number | null; // min altitude
+  top: number | null; // max altitude
+
+  // Movement
+  movementDir: string | null;
+  movementSpd: string | number | null; // Unified to handle both types safely
+
+  // Raw Data
+  rawText: string;
+}
+
+export type NormalizedWeatherEntry = BaseWeatherEntry & ({
+  type: typeof WeatherTypes.ISIGMET;
+  qualifier: string; // Isigmet specific
+} | {
+  type: typeof WeatherTypes.AIRSIGMET;
+  severity: number; // AirSigmet specific
+});

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
-import { IsigmetEntry, AirSigmetEntry } from '@/types';
+import { IsigmetEntry, AirSigmetEntry } from '@repo/types';
 
 export async function GET() {
   try {
