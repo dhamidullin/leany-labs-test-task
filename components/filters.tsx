@@ -2,10 +2,10 @@
 
 import Slider from 'rc-slider';
 import { useFilter } from "@/contexts/FilterContext";
-import 'rc-slider/assets/index.css';
 import { useState, useEffect } from "react";
 import { useDebouncedCallback } from 'use-debounce';
 import ColorCheckbox from "@/components/ColorCheckbox";
+import 'rc-slider/assets/index.css';
 
 export default function Filters() {
   const { 
@@ -31,17 +31,19 @@ export default function Filters() {
   const debouncedSetTimeFilter = useDebouncedCallback(setContextTimeFilter, 100);
 
   const handleAltitudeChange = (value: number | number[]) => {
-    if (Array.isArray(value)) {
-      setLocalAltitudeRange(value);
-      debouncedSetAltitudeRange(value);
-    }
+    if (!Array.isArray(value))
+      return
+
+    setLocalAltitudeRange(value);
+    debouncedSetAltitudeRange(value);
   };
 
   const handleTimeChange = (value: number | number[]) => {
-    if (!Array.isArray(value)) {
-      setLocalTimeFilter(value);
-      debouncedSetTimeFilter(value);
-    }
+    if (Array.isArray(value))
+      return
+    
+    setLocalTimeFilter(value);
+    debouncedSetTimeFilter(value);
   };
 
   const formatTime = (timestamp: number) => {

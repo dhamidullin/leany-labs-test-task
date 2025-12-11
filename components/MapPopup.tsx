@@ -128,14 +128,14 @@ export default function MapPopup({ map }: { map: maplibregl.Map }) {
       .setDOMContent(popupNode)
       .addTo(map);
 
-    popup.getElement().style.visibility = 'hidden';
     popupRef.current = popup;
 
     // This fixes the issue where popup opens off-screen initially
+    popup.getElement().style.visibility = 'hidden';
     setTimeout(() => {
       popup.setLngLat([lng, lat])
       popup.getElement().style.visibility = 'visible';
-    });
+    }, 0);
 
     // Cleanup when component unmounts or data changes
     return () => {
@@ -149,4 +149,3 @@ export default function MapPopup({ map }: { map: maplibregl.Map }) {
 
   return null;
 }
-
