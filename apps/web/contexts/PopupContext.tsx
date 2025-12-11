@@ -1,10 +1,10 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { IsigmetEntry, AirSigmetEntry } from '@repo/types';
+import { NormalizedWeatherEntry } from '@repo/types';
 
 type PopupData = {
-  data: IsigmetEntry | AirSigmetEntry;
+  data: NormalizedWeatherEntry;
   lng: number;
   lat: number;
   type: 'SIGMET' | 'AIRSIGMET';

@@ -63,8 +63,33 @@ app.get('/sigmets', async (req, res) => {
       }))
     ];
 
+    const { sigmet, airsigmet, minAlt, maxAlt, date } = req.query;
+
+    const showSigmet = sigmet === 'true';
+    const showAirSigmet = airsigmet === 'true';
+    const filterMinAlt = minAlt ? parseFloat(minAlt as string) : null;
+    const filterMaxAlt = maxAlt ? parseFloat(maxAlt as string) : null;
+    const filterDate = date ? new Date(date as string).getTime() / 1000 : null;
+
+    const filtered = normalized.filter(item => {
+      if (item.type === WeatherTypes.ISIGMET && !showSigmet) return false;
+      if (item.type === WeatherTypes.AIRSIGMET && !showAirSigmet) return false;
+
+      const itemBase = item.base ?? 0;
+      const itemTop = item.top ?? Infinity;
+
+      if (filterMinAlt !== null && itemTop < filterMinAlt) return false;
+      if (filterMaxAlt !== null && itemBase > filterMaxAlt) return false;
+
+      if (filterDate !== null && !isNaN(filterDate)) {
+        if (filterDate < item.validTimeFrom || filterDate > item.validTimeTo) return false;
+      }
+
+      return true;
+    });
+
     res.json({
-      normalized,
+      normalized: filtered,
     });
   } catch (error) {
     console.error('Error fetching weather data:', error);

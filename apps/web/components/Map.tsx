@@ -9,12 +9,19 @@ import center from '@turf/center';
 
 import MapPopup from './MapPopup';
 
+import { WeatherTypes } from '@repo/types';
+
 export default function Map() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const { isigmets, airSigmets } = useMapData();
+  const { sigmets: allSigmets } = useMapData();
   const { setPopupData } = usePopup();
+
+  // Split data for rendering
+  const isigmets = allSigmets.filter(s => s.type === WeatherTypes.ISIGMET);
+  const airSigmets = allSigmets.filter(s => s.type === WeatherTypes.AIRSIGMET);
+
 
   useEffect(() => {
     if (map.current) return; // stops map from initializing more than once

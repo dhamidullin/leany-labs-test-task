@@ -21,16 +21,11 @@ function PopupContent({ data, type, onClose }: { data: any, type: string, onClos
     });
   };
 
-  const altitudeText = () => {
-    if (data.base || data.top) {
-      const base = data.base ? `${data.base}ft` : 'SFC';
-      const top = data.top ? `${data.top}ft` : 'Unknown';
+    const altitudeText = () => {
+    if (data.base !== undefined || data.top !== undefined) {
+      const base = data.base !== null ? `${data.base}ft` : 'SFC';
+      const top = data.top !== null ? `${data.top}ft` : 'Unknown';
       return `${base} - ${top}`;
-    }
-    if (data.altitudeLow1 || data.altitudeHi1) {
-      const low = data.altitudeLow1 ? `${data.altitudeLow1}ft` : 'SFC';
-      const high = data.altitudeHi1 ? `${data.altitudeHi1}ft` : 'Unknown';
-      return `${low} - ${high}`;
     }
     return 'Unknown';
   }
@@ -75,7 +70,7 @@ function PopupContent({ data, type, onClose }: { data: any, type: string, onClos
 
       <div className="bg-gray-50 p-3 rounded text-xs text-gray-600 leading-relaxed max-h-32 overflow-y-auto">
         <span className="font-semibold block mb-1">Raw Text:</span>
-        {data.rawSigmet || data.rawAirSigmet}
+        {data.rawText}
       </div>
     </div>
   );

@@ -1,23 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
-import { IsigmetEntry, AirSigmetEntry } from '@repo/types';
+import { NormalizedWeatherEntry } from '@repo/types';
+import { api, WeatherDataParams } from '@/services/api';
 
 export interface WeatherData {
-  isigmets: IsigmetEntry[];
-  airSigmets: AirSigmetEntry[];
+  normalized: NormalizedWeatherEntry[];
 }
 
-const fetchWeatherData = async (): Promise<WeatherData> => {
-  const response = await fetch('/api/weather');
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
-  }
-  return response.json();
-};
-
-export const useWeatherData = () => {
+export const useWeatherData = (params?: WeatherDataParams) => {
   return useQuery({
-    queryKey: ['weather'],
-    queryFn: fetchWeatherData,
+    queryKey: ['weather', params],
+    queryFn: () => api.getWeatherData(params),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
