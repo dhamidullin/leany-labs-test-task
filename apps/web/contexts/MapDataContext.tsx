@@ -7,6 +7,7 @@ import { NormalizedWeatherEntry } from '@repo/types';
 
 interface MapDataContextType {
   sigmets: NormalizedWeatherEntry[];
+  isLoading: boolean;
 }
 
 const MapDataContext = createContext<MapDataContextType | undefined>(undefined);
@@ -19,7 +20,7 @@ export function MapDataProvider({ children }: { children: ReactNode }) {
     timeFilter
   } = useFilter();
 
-  const { data: weatherData } = useWeatherData({
+  const { data: weatherData, isLoading } = useWeatherData({
     sigmet: showSigmet,
     airsigmet: showAirsigmet,
     minAlt: altitudeRange[0],
@@ -28,7 +29,8 @@ export function MapDataProvider({ children }: { children: ReactNode }) {
   });
 
   const value: MapDataContextType = {
-    sigmets: weatherData?.normalized || []
+    sigmets: weatherData?.normalized || [],
+    isLoading,
   };
 
   return (

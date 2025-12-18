@@ -8,6 +8,7 @@ import { usePopup } from '@/contexts/PopupContext';
 import center from '@turf/center';
 
 import MapPopup from './MapPopup';
+import Loader from './Loader';
 
 import { WeatherTypes } from '@repo/types';
 
@@ -15,7 +16,7 @@ export default function Map() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const { sigmets: allSigmets } = useMapData();
+  const { sigmets: allSigmets, isLoading } = useMapData();
   const { setPopupData } = usePopup();
 
   // Split data for rendering
@@ -230,7 +231,8 @@ export default function Map() {
   }, [isigmets, airSigmets, mapLoaded]);
 
   return (
-    <div className="w-full h-screen" ref={mapContainer}>
+    <div className="relative w-full h-screen" ref={mapContainer}>
+      {(!mapLoaded || isLoading) && <Loader />}
       {map.current && <MapPopup map={map.current} />}
     </div>
   );

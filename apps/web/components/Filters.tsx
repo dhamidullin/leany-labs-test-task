@@ -65,7 +65,7 @@ export default function Filters() {
   const dateFilterRangeTo = startOfHour.getTime() + 6 * 60 * 60 * 1000; // 6 hours ahead
 
   return (
-    <div className="absolute top-6 right-6 z-10 bg-white p-4 rounded-lg shadow-md w-72">
+    <div className="absolute top-6 right-6 z-50 bg-white p-4 rounded-lg shadow-md w-72">
       <h3 className="font-semibold text-gray-900 mb-3 text-sm">Layers</h3>
       <div className="flex gap-2 mb-6">
         <ColorCheckbox
