@@ -22,7 +22,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   const [sigmet, setSigmet] = useState(true);
   const [airsigmet, setAirsigmet] = useState(true);
   const [altitudeRange, setAltitudeRange] = useState<number[]>([0, 48000]);
-  const [timeFilter, setTimeFilter] = useState<number>(new Date().getTime());
+  const [timeFilter, setTimeFilter] = useState<number>(new Date().setSeconds(0, 0)); // TODO: create utils functions for get start of the minute
 
   const value: FilterContextType = {
     sigmet, setSigmet, 

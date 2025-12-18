@@ -46,7 +46,7 @@ export default function Filters() {
     debouncedSetTimeFilter(value);
   };
 
-  const formatTime = (timestamp: number) => {
+  const formatTime = (timestamp: number) => { // TODO: move to utils
     return new Date(timestamp).toLocaleString('en-US', {
       month: 'numeric',
       day: 'numeric',
@@ -57,6 +57,12 @@ export default function Filters() {
       hour12: true
     });
   };
+
+  const now = new Date()
+  const startOfHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0)
+  // TODO: create utils functions for get start of the hour
+  const dateFilterRangeFrom = startOfHour.getTime() - 24 * 60 * 60 * 1000; // 24 hours ago
+  const dateFilterRangeTo = startOfHour.getTime() + 6 * 60 * 60 * 1000; // 6 hours ahead
 
   return (
     <div className="absolute top-6 right-6 z-10 bg-white p-4 rounded-lg shadow-md w-72">
@@ -111,8 +117,8 @@ export default function Filters() {
 
         <div className="px-1">
           <Slider
-            min={new Date().getTime() - 24 * 60 * 60 * 1000} // 24 hours ago
-            max={new Date().getTime() + 6 * 60 * 60 * 1000} // 6 hours ahead
+            min={dateFilterRangeFrom}
+            max={dateFilterRangeTo}
             step={60 * 60 * 1000}
             value={localTimeFilter}
             onChange={handleTimeChange}

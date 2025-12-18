@@ -19,9 +19,12 @@ export default function Map() {
   const { setPopupData } = usePopup();
 
   // Split data for rendering
-  const isigmets = allSigmets.filter(s => s.type === WeatherTypes.ISIGMET);
-  const airSigmets = allSigmets.filter(s => s.type === WeatherTypes.AIRSIGMET);
-
+  const isigmets = allSigmets
+    .filter(s => s.type === WeatherTypes.ISIGMET)
+    .map(item => ({ ...item, coords: item.coords ?? [] })); // TODO: remove this hack later
+  const airSigmets = allSigmets
+    .filter(s => s.type === WeatherTypes.AIRSIGMET)
+    .map(item => ({ ...item, coords: item.coords ?? [] })); // TODO: remove this hack later
 
   useEffect(() => {
     if (map.current) return; // stops map from initializing more than once
