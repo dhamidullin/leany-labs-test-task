@@ -3,10 +3,11 @@
   "private": true,
   "scripts": {
     "dev": "pnpm -r --parallel dev",
-    "build": "pnpm -r run build",
-    "start": "pnpm -r --parallel start",
     "dev:backend": "pnpm --filter ./apps/backend dev",
     "dev:web": "pnpm --filter ./apps/web dev",
+    "build": "pnpm -r run build",
+    "start": "pnpm -r --parallel start",
+    "lint": "pnpm -r run lint",
     "test": "pnpm -r test"
   },
   "dependencies": {

@@ -89,7 +89,7 @@ export default function MapPopup({ map }: { map: maplibregl.Map }) {
       return;
     }
 
-    const { data, x, y, type, lng, lat } = popupData as any; // We'll update type definition next
+    const { data, type, lng, lat } = popupData as any; // We'll update type definition next
 
     // Create a container for the React component
     const popupNode = document.createElement('div');
@@ -105,9 +105,6 @@ export default function MapPopup({ map }: { map: maplibregl.Map }) {
         }}
       />
     );
-
-    // If we have lat/lng (which we will add), use setLngLat, otherwise use point (less ideal for tracking)
-    // But since we want it to track the map, we MUST use LngLat.
 
     if (popupRef.current) {
       popupRef.current.remove();
@@ -125,19 +122,13 @@ export default function MapPopup({ map }: { map: maplibregl.Map }) {
 
     popupRef.current = popup;
 
-    // This fixes the issue where popup opens off-screen initially
     popup.getElement().style.visibility = 'hidden';
     setTimeout(() => {
       popup.setLngLat([lng, lat])
       popup.getElement().style.visibility = 'visible';
     }, 0);
 
-    // Cleanup when component unmounts or data changes
     return () => {
-      // We generally want to keep it open until data changes to null or new data
-      // But react effect cleanup runs before next effect.
-      // We'll let the next effect execution handle removal if data exists, 
-      // or this cleanup if data becomes null.
       setTimeout(() => root.unmount(), 0);
     };
   }, [popupData, map, closePopup]);
