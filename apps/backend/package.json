@@ -5,6 +5,7 @@
   "license": "ISC",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only index.ts",
+    "build": "echo \"Backend doesn't need to be built as for now\"",
     "start": "ts-node index.ts",
     "test": "jest"
   },

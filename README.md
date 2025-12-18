@@ -57,6 +57,20 @@ This project is set up as a monorepo. You can run both the frontend and backend 
 
     *   Backend API is available at [http://localhost:3001](http://localhost:3001)
 
+### Production
+
+1.  **Build the application:**
+
+    ```bash
+    pnpm build
+    ```
+
+2.  **Start production servers:**
+
+    ```bash
+    pnpm start
+    ```
+
 ### Testing
 
 The backend includes unit tests for the caching logic (covering TTL, eviction policies, and complex object handling).
@@ -72,7 +86,3 @@ pnpm test
 *   `apps/web`: Next.js frontend application.
 *   `apps/backend`: Express backend service with caching and data normalization.
 *   `packages/types`: Shared TypeScript definitions.
-
-## Note on Production
-
-The production environment setup has not been implemented yet.
