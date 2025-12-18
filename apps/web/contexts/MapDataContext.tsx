@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, ReactNode, useMemo } from 'react';
+import { createContext, useContext, ReactNode } from 'react';
 import { useFilter } from './FilterContext';
 import { useWeatherData } from '@/hooks/queries';
 import { NormalizedWeatherEntry } from '@repo/types';
