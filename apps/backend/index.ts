@@ -17,7 +17,7 @@ app.get('/ping', (req, res) => {
   res.send('pong');
 });
 
-app.get('/sigmets', async (req, res) => {
+app.get('/geojson', async (req, res) => {
   try {
     const normalized = await fetchWeatherData();
 
@@ -46,11 +46,21 @@ app.get('/sigmets', async (req, res) => {
       return true;
     });
 
+    const features = filtered.map(item => ({
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [(item.coords || []).map(c => [c.lon, c.lat])]
+      },
+      properties: item
+    }));
+
     res.json({
-      normalized: filtered,
+      type: 'FeatureCollection',
+      features
     });
   } catch (error) {
-    console.error('Error fetching weather data:', error);
+    console.error('Error fetching geojson data:', error);
     res.status(500).json({ error: 'Failed to fetch weather data' });
   }
 });

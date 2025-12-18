@@ -3,7 +3,6 @@
 import { QueryClient, QueryClientProvider, QueryCache } from '@tanstack/react-query';
 import { useState } from 'react';
 import { FilterProvider } from '@/contexts/FilterContext';
-import { MapDataProvider } from '@/contexts/MapDataContext';
 import { PopupProvider } from '@/contexts/PopupContext';
 import { toast } from 'sonner';
 
@@ -20,11 +19,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <FilterProvider>
-        <MapDataProvider>
-          <PopupProvider>
-            {children}
-          </PopupProvider>
-        </MapDataProvider>
+        <PopupProvider>
+          {children}
+        </PopupProvider>
       </FilterProvider>
     </QueryClientProvider>
   );

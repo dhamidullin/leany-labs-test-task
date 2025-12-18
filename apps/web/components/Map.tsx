@@ -3,32 +3,42 @@
 import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { useMapData } from '@/contexts/MapDataContext';
 import { usePopup } from '@/contexts/PopupContext';
+import { useFilter } from '@/contexts/FilterContext';
 import center from '@turf/center';
 
 import MapPopup from './MapPopup';
 import Loader from './Loader';
+import { API_URL } from '@/services/api';
 
-import { WeatherTypes } from '@repo/types';
-
-export default function Map() {
+const useWeatherMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const { sigmets: allSigmets, isLoading } = useMapData();
+  const [isMapLoading, setIsMapLoading] = useState(false); // Track internal map loading state
+
   const { setPopupData } = usePopup();
 
-  // Split data for rendering
-  const isigmets = allSigmets
-    .filter(s => s.type === WeatherTypes.ISIGMET)
-    .map(item => ({ ...item, coords: item.coords ?? [] })); // TODO: remove this hack later
-  const airSigmets = allSigmets
-    .filter(s => s.type === WeatherTypes.AIRSIGMET)
-    .map(item => ({ ...item, coords: item.coords ?? [] })); // TODO: remove this hack later
+  const {
+    sigmet,
+    airsigmet,
+    altitudeRange,
+    timeFilter
+  } = useFilter();
+
+  // Construct the GeoJSON URL with current filters
+  const queryParams = new URLSearchParams({
+    sigmet: String(sigmet),
+    airsigmet: String(airsigmet),
+    minAlt: String(altitudeRange[0]),
+    maxAlt: String(altitudeRange[1]),
+    date: new Date(timeFilter).toISOString(),
+  });
+
+  const dataUrl = `${API_URL}/geojson?${queryParams.toString()}`;
 
   useEffect(() => {
-    if (map.current) return; // stops map from initializing more than once
+    if (map.current) return;
 
     if (mapContainer.current) {
       map.current = new maplibregl.Map({
@@ -64,12 +74,30 @@ export default function Map() {
       map.current.on('load', () => {
         setMapLoaded(true);
       });
+
+      // Loading state handlers
+      map.current.on('dataloading', (e) => {
+        if ((e as any).sourceId === 'weather-data') {
+          setIsMapLoading(true);
+        }
+      });
+
+      map.current.on('data', (e) => {
+        if ((e as any).sourceId === 'weather-data' && (e as any).isSourceLoaded === true) {
+          setIsMapLoading(false);
+        }
+      });
+
+      map.current.on('error', (e) => {
+        console.error('Map error:', e);
+        setIsMapLoading(false);
+      });
     }
 
     return () => {
       if (map.current) {
-          map.current.remove();
-          map.current = null;
+        map.current.remove();
+        map.current = null;
       }
     }
   }, []);
@@ -78,41 +106,23 @@ export default function Map() {
     if (!map.current || !mapLoaded) return;
 
     const mapInstance = map.current;
+    const sourceId = 'weather-data';
 
-    // Handle AirSigmets
-    if (mapInstance.getSource('airsigmets')) {
-      const source = mapInstance.getSource('airsigmets') as maplibregl.GeoJSONSource;
-      source.setData({
-        type: 'FeatureCollection',
-        features: airSigmets.map((sigmet) => ({
-          type: 'Feature',
-          geometry: {
-            type: 'Polygon',
-            coordinates: [sigmet.coords.map((coord) => [coord.lon, coord.lat])],
-          },
-          properties: sigmet,
-        })),
-      });
+    if (mapInstance.getSource(sourceId)) {
+      const source = mapInstance.getSource(sourceId) as maplibregl.GeoJSONSource;
+      source.setData(dataUrl);
     } else {
-      mapInstance.addSource('airsigmets', {
+      mapInstance.addSource(sourceId, {
         type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: airSigmets.map((sigmet) => ({
-            type: 'Feature',
-            geometry: {
-              type: 'Polygon',
-              coordinates: [sigmet.coords.map((coord) => [coord.lon, coord.lat])],
-            },
-            properties: sigmet,
-          })),
-        },
+        data: dataUrl,
       });
 
+      // AIRSIGMET Layers
       mapInstance.addLayer({
         id: 'airsigmets-fill',
         type: 'fill',
-        source: 'airsigmets',
+        source: sourceId,
+        filter: ['==', 'type', 'AIRSIGMET'],
         paint: {
           'fill-color': '#88CCEE',
           'fill-opacity': 0.4,
@@ -122,71 +132,20 @@ export default function Map() {
       mapInstance.addLayer({
         id: 'airsigmets-outline',
         type: 'line',
-        source: 'airsigmets',
+        source: sourceId,
+        filter: ['==', 'type', 'AIRSIGMET'],
         paint: {
           'line-color': '#0000FF',
           'line-width': 2,
         },
       });
-      
-      mapInstance.on('mouseenter', 'airsigmets-fill', () => {
-        mapInstance.getCanvas().style.cursor = 'pointer';
-      });
-      mapInstance.on('mouseleave', 'airsigmets-fill', () => {
-        mapInstance.getCanvas().style.cursor = '';
-      });
-      mapInstance.on('click', 'airsigmets-fill', (e) => {
-        if (e.features && e.features.length > 0) {
-            const feature = e.features[0];
-            
-            // Calculate center using turf
-            const centerPoint = center(feature as any);
-            const [lng, lat] = centerPoint.geometry.coordinates;
-            
-            setPopupData({
-                data: feature.properties as any,
-                lng,
-                lat,
-                type: 'AIRSIGMET'
-            });
-        }
-      });
-    }
 
-    // Handle Isigmets
-    if (mapInstance.getSource('isigmets')) {
-      const source = mapInstance.getSource('isigmets') as maplibregl.GeoJSONSource;
-      source.setData({
-        type: 'FeatureCollection',
-        features: isigmets.map((sigmet) => ({
-          type: 'Feature',
-          geometry: {
-            type: 'Polygon',
-            coordinates: [sigmet.coords.map((coord) => [coord.lon, coord.lat])],
-          },
-          properties: sigmet,
-        })),
-      });
-    } else {
-      mapInstance.addSource('isigmets', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: isigmets.map((sigmet) => ({
-            type: 'Feature',
-            geometry: {
-              type: 'Polygon',
-              coordinates: [sigmet.coords.map((coord) => [coord.lon, coord.lat])],
-            },
-            properties: sigmet,
-          })),
-        },
-      });
-
+      // ISIGMET Layers
       mapInstance.addLayer({
         id: 'isigmets-fill',
         type: 'fill',
-        source: 'isigmets',
+        source: sourceId,
+        filter: ['==', 'type', 'ISIGMET'],
         paint: {
           'fill-color': '#EE8888',
           'fill-opacity': 0.4,
@@ -196,43 +155,56 @@ export default function Map() {
       mapInstance.addLayer({
         id: 'isigmets-outline',
         type: 'line',
-        source: 'isigmets',
+        source: sourceId,
+        filter: ['==', 'type', 'ISIGMET'],
         paint: {
           'line-color': '#FF0000',
           'line-width': 2,
         },
       });
 
-      // Re-bind events for isigmets
-      mapInstance.on('mouseenter', 'isigmets-fill', () => {
-        mapInstance.getCanvas().style.cursor = 'pointer';
-      });
-      mapInstance.on('mouseleave', 'isigmets-fill', () => {
-        mapInstance.getCanvas().style.cursor = '';
-      });
-      mapInstance.on('click', 'isigmets-fill', (e) => {
-        if (e.features && e.features.length > 0) {
+      // Interactions
+      const layers = ['airsigmets-fill', 'isigmets-fill'];
+
+      layers.forEach(layer => {
+        // handle mouse enter and leave to show pointer cursor over clickable areas
+        mapInstance.on('mouseenter', layer, () => {
+          mapInstance.getCanvas().style.cursor = 'pointer';
+        });
+        mapInstance.on('mouseleave', layer, () => {
+          mapInstance.getCanvas().style.cursor = '';
+        });
+
+        // handle click on layer to show popup
+        mapInstance.on('click', layer, (e) => {
+          if (e.features && e.features.length > 0) {
             const feature = e.features[0];
-            
+
             // Calculate center using turf
             const centerPoint = center(feature as any);
             const [lng, lat] = centerPoint.geometry.coordinates;
 
             setPopupData({
-                data: feature.properties as any,
-                lng,
-                lat,
-                type: 'SIGMET'
+              data: feature.properties as any,
+              lng,
+              lat,
+              type: feature.properties?.type === 'ISIGMET' ? 'SIGMET' : 'AIRSIGMET'
             });
-        }
+          }
+        });
       });
     }
+  }, [dataUrl, mapLoaded, setPopupData]);
 
-  }, [isigmets, airSigmets, mapLoaded]);
+  return { mapContainer, mapLoaded, isMapLoading, map }
+}
+
+export default function Map() {
+  const { mapContainer, mapLoaded, isMapLoading, map } = useWeatherMap();
 
   return (
     <div className="relative w-full h-screen" ref={mapContainer}>
-      {(!mapLoaded || isLoading) && <Loader />}
+      {(!mapLoaded || isMapLoading) && <Loader />}
       {map.current && <MapPopup map={map.current} />}
     </div>
   );
