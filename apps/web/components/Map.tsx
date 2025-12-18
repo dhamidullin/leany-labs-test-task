@@ -10,6 +10,7 @@ import center from '@turf/center';
 import MapPopup from './MapPopup';
 import Loader from './Loader';
 import { API_URL } from '@/services/api';
+import { NormalizedWeatherEntry } from '@repo/types';
 
 const useWeatherMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -76,14 +77,14 @@ const useWeatherMap = () => {
       });
 
       // Loading state handlers
-      map.current.on('dataloading', (e) => {
-        if ((e as any).sourceId === 'weather-data') {
+      map.current.on('dataloading', (e: { sourceId?: 'weather-data', isSourceLoaded?: boolean }) => {
+        if (e.sourceId === 'weather-data') {
           setIsMapLoading(true);
         }
       });
 
-      map.current.on('data', (e) => {
-        if ((e as any).sourceId === 'weather-data' && (e as any).isSourceLoaded === true) {
+      map.current.on('data', (e: { sourceId?: 'weather-data', isSourceLoaded?: boolean }) => {
+        if (e.sourceId === 'weather-data' && e.isSourceLoaded === true) {
           setIsMapLoading(false);
         }
       });
@@ -183,11 +184,11 @@ const useWeatherMap = () => {
             const feature = e.features[0];
 
             // Calculate center using turf
-            const centerPoint = center(feature as any);
+            const centerPoint = center(feature);
             const [lng, lat] = centerPoint.geometry.coordinates;
 
             setPopupData({
-              data: feature.properties as any,
+              data: feature.properties as NormalizedWeatherEntry,
               lng,
               lat,
               type: feature.properties?.type === 'ISIGMET' ? 'SIGMET' : 'AIRSIGMET'

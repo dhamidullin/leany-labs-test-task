@@ -4,8 +4,15 @@ import { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import { usePopup } from '@/contexts/PopupContext';
 import { createRoot } from 'react-dom/client';
+import { NormalizedWeatherEntry } from '@repo/types';
 
-function PopupContent({ data, type, onClose }: { data: any, type: string, onClose: () => void }) {
+interface PopupContentProps {
+  data: NormalizedWeatherEntry
+  type: string
+  onClose: () => void
+}
+
+function PopupContent({ data, type, onClose }: PopupContentProps) {
   const isSigmet = type === 'SIGMET';
 
   // Helper to format date
@@ -21,7 +28,7 @@ function PopupContent({ data, type, onClose }: { data: any, type: string, onClos
     });
   };
 
-    const altitudeText = () => {
+  const altitudeText = () => {
     if (data.base !== undefined || data.top !== undefined) {
       const base = data.base !== null ? `${data.base}ft` : 'SFC';
       const top = data.top !== null ? `${data.top}ft` : 'Unknown';
@@ -89,7 +96,7 @@ export default function MapPopup({ map }: { map: maplibregl.Map }) {
       return;
     }
 
-    const { data, type, lng, lat } = popupData as any; // We'll update type definition next
+    const { data, type, lng, lat } = popupData;
 
     // Create a container for the React component
     const popupNode = document.createElement('div');
