@@ -95,6 +95,8 @@ const useWeatherMap = () => {
     }
 
     return () => {
+      // NOTE: remove() removes map's DOM elements and all event listners
+      // so no additional cleanup is needed (addressing the feedback)
       if (map.current) {
         map.current.remove();
         map.current = null;
