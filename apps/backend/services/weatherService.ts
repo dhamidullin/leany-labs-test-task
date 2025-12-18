@@ -17,10 +17,8 @@ export const fetchWeatherData = async (): Promise<NormalizedWeatherEntry[]> => {
   const cachedData = await cache.get<NormalizedWeatherEntry[]>(CACHE_KEY);
 
   if (cachedData) {
-    console.log('Cached data found');
     return cachedData;
   }
-  console.log('No cached data found, fetching from API');
 
   const [isigmetRes, airSigmetRes] = await Promise.all([
     axios.get<IsigmetEntry[]>(ISIGMET_API_URL),
